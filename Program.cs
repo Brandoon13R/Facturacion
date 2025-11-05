@@ -34,11 +34,20 @@ conexion.Open();
 var comando = conexion.CreateCommand();
 comando.CommandText = @"
     create table if not exists facturas(
-        identificador INTEGER,
+        Identificador INTEGER PRIMARY KEY AUTOINCREMENT,
         Fecha_emision Date,
-        nombre_Cliente TEXT,
-        Precio INTEGER,
-    )";
+        Nombre_Cliente TEXT,
+        Articulo TEXT,
+        Precio_Total INTEGER
+    );
+
+    create table if not exists articulos(
+        Identificador INTEGER PRIMARY KEY AUTOINCREMENT,
+        Articulo TEXT,
+        Precio INTEGER
+    )
+";
+
 comando.ExecuteNonQuery();
 
 app.Run();
