@@ -7,6 +7,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Components\NewFolder1\**" />
+    <Compile Remove="Components\NewFolder2\**" />
+    <Content Remove="Components\NewFolder1\**" />
+    <Content Remove="Components\NewFolder2\**" />
+    <EmbeddedResource Remove="Components\NewFolder1\**" />
+    <EmbeddedResource Remove="Components\NewFolder2\**" />
+    <None Remove="Components\NewFolder1\**" />
+    <None Remove="Components\NewFolder2\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Components\Factura.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.10" />
   </ItemGroup>
 
