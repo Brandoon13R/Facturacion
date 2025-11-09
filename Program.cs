@@ -1,7 +1,15 @@
 using Facturación.Components;
 using Microsoft.Data.Sqlite;
+using Facturación.Components.Data;
+using Facturación.Components.Controlador;
 
 var builder = WebApplication.CreateBuilder(args);
+
+String ruta = "FacturacionBase.db";
+string connectionString = $"DataSource={ruta}";
+
+builder.Services.AddScoped<ServicioFactura>(sp => new ServicioFactura(connectionString));
+builder.Services.AddScoped<ServicioControlador>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -26,28 +34,27 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-String ruta = "FacturacionBase.db";
 
-using var conexion = new SqliteConnection($"DataSource={ruta}");
-
-conexion.Open();
-var comando = conexion.CreateCommand();
-comando.CommandText = @"
+using (var conexion = new SqliteConnection(connectionString))
+{
+    conexion.Open();
+    var comando = conexion.CreateCommand();
+    comando.CommandText = @"
     create table if not exists facturas(
         Identificador INTEGER PRIMARY KEY AUTOINCREMENT,
         Fecha_emision Date,
         Nombre_Cliente TEXT,
-        Articulo TEXT,
+        Articulos TEXT,
         Precio_Total INTEGER
     );
 
     create table if not exists articulos(
-        Identificador INTEGER PRIMARY KEY AUTOINCREMENT,
-        Articulo TEXT,
+        Codigo INTEGER PRIMARY KEY AUTOINCREMENT,
+        Nombre TEXT,
         Precio INTEGER
     )
-";
-
-comando.ExecuteNonQuery();
+    ";
+    comando.ExecuteNonQuery();
+}
 
 app.Run();
