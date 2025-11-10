@@ -4,15 +4,27 @@ namespace Facturación.Components.Controlador
 {
     public class ServicioControlador
     {
-        private readonly ServicioFactura servicioFactura;
+        private readonly ServicioFactura _servicioFactura;
 
         public ServicioControlador(ServicioFactura servicioFactura)
         {
-            this.servicioFactura = servicioFactura;
+            _servicioFactura = servicioFactura;
         }
-        public async Task GenerarFactura(Factura factura)
+        public async Task<List<Factura>> ObtenerFacturas()
         {
-            await servicioFactura.GenerarFactura(factura);
+            return await _servicioFactura.ObtenerFacturas();
+        }
+
+        public async Task AgregarFactura(Factura factura)
+        {
+            factura.Identificador = await GenerarNuevoID();
+            factura.Precio_Total = factura.Articulos.Sum(a => a.Precio);
+            await _servicioFactura.AgregarFactura(factura);
+        }
+        private async Task<int> GenerarNuevoID()
+        {
+            var facturas = await _servicioFactura.ObtenerFacturas();
+            return facturas.Any() ? facturas.Max(f => f.Identificador) + 1 : 1;
         }
     }
 }

@@ -4,23 +4,43 @@ namespace Facturación.Components.Data
 {
     public class ServicioFactura
     {
-        public List<Factura> Facturas = new List<Factura>();
-        public async Task GenerarFactura(Factura factura)
+        private List<Factura> facturas = new List<Factura>();
+        private string _connectionString = "DataSource=FacturacionBase.db";
+
+        public Task<List<Factura>> ObtenerFacturas() => Task.FromResult(facturas);
+
+        public async Task AgregarFactura(Factura factura)
         {
-            String ruta = "FacturacionBase.db";
-            using var conexion = new SqliteConnection($"DataSource={ruta}");
-            await conexion.OpenAsync();
+            using (var conexion = new SqliteConnection(_connectionString))
+            {
+                await conexion.OpenAsync();
 
-            var comando = conexion.CreateCommand();
-            comando.CommandText = "INSERT INTO facturas (Identificador, nombre_Cliente, Articulo) VALUES (@identificador, @nombre, @jugado)";
-            comando.Parameters.AddWithValue("@Identificador", factura.Identificador);
-            comando.Parameters.AddWithValue("@nombre_Cliente", factura.Nombre_Cliente);
-            comando.Parameters.AddWithValue("@Articulo", factura.Articulo);
-            comando.Parameters.AddWithValue("Fecha_emision", factura.Fecha_emision);
+                // --- Inserta la Factura (el "encabezado") ---
+                var cmdFactura = conexion.CreateCommand();
+                cmdFactura.CommandText =
+                    "INSERT INTO facturas (Identificador, Fecha_emision, Nombre_Cliente, Precio_Total) " +
+                    "VALUES (@id, @fecha, @cliente, @total)";
 
-            await comando.ExecuteNonQueryAsync();
+                cmdFactura.Parameters.AddWithValue("@id", factura.Identificador);
+                cmdFactura.Parameters.AddWithValue("@fecha", factura.Fecha_emision.ToString("yyyy-MM-dd"));
+                cmdFactura.Parameters.AddWithValue("@cliente", factura.Nombre_Cliente);
+                cmdFactura.Parameters.AddWithValue("@total", factura.Precio_Total);
+                await cmdFactura.ExecuteNonQueryAsync();
 
-            Facturas.Add(factura);
+                foreach (var articulo in factura.Articulos)
+                {
+                    var cmdArticulo = conexion.CreateCommand();
+                    cmdArticulo.CommandText =
+                        "INSERT INTO articulos (Nombre, Precio, FacturaId) " +
+                        "VALUES (@nombre, @precio, @facturaId)";
+
+                    cmdArticulo.Parameters.AddWithValue("@nombre", articulo.Nombre);
+                    cmdArticulo.Parameters.AddWithValue("@precio", articulo.Precio);
+                    cmdArticulo.Parameters.AddWithValue("@facturaId", factura.Identificador); // El vínculo
+                    await cmdArticulo.ExecuteNonQueryAsync();
+                }
+            }
+            facturas.Add(factura);
         }
     }
 }
