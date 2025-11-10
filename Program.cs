@@ -5,56 +5,50 @@ using Facturación.Components.Controlador;
 
 var builder = WebApplication.CreateBuilder(args);
 
-String ruta = "FacturacionBase.db";
-string connectionString = $"DataSource={ruta}";
-
-builder.Services.AddScoped<ServicioFactura>(sp => new ServicioFactura(connectionString));
-builder.Services.AddScoped<ServicioControlador>();
-
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddSingleton<ServicioFactura>();
+builder.Services.AddSingleton<ServicioControlador>();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-
-
 app.UseAntiforgery();
-
 app.MapStaticAssets();
+
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
+String ruta = "FacturacionBase.db"; 
+using var conexion = new SqliteConnection($"DataSource={ruta}");
+conexion.Open();
+var comando = conexion.CreateCommand();
 
-using (var conexion = new SqliteConnection(connectionString))
-{
-    conexion.Open();
-    var comando = conexion.CreateCommand();
-    comando.CommandText = @"
-    create table if not exists facturas(
-        Identificador INTEGER PRIMARY KEY AUTOINCREMENT,
-        Fecha_emision Date,
+comando.CommandText = @"
+    CREATE TABLE IF NOT EXISTS facturas(
+        Identificador INTEGER,
+        Fecha_emision TEXT,
         Nombre_Cliente TEXT,
-        Articulos TEXT,
         Precio_Total INTEGER
     );
+";
+comando.ExecuteNonQuery();
 
-    create table if not exists articulos(
-        Codigo INTEGER PRIMARY KEY AUTOINCREMENT,
+comando.CommandText = @"
+    CREATE TABLE IF NOT EXISTS articulos(
         Nombre TEXT,
-        Precio INTEGER
-    )
-    ";
-    comando.ExecuteNonQuery();
-}
+        Precio INTEGER,
+        FacturaId INTEGER
+    );
+";
+comando.ExecuteNonQuery();
 
 app.Run();

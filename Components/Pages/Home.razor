@@ -1,12 +1,82 @@
 ﻿@page "/"
+@rendermode InteractiveServer
+@using Facturación.Components.Data
+@inject Facturación.Components.Controlador.ServicioControlador ControladorFacturas
 
-<PageTitle>Facturaci&oacute;n</PageTitle>
+<PageTitle>Facturación</PageTitle>
 
-<h1>
-    <center>
-        Generaci&oacute;n de facturas
-    </center>
-</h1>
+<h1>Generación de facturas</h1>
 
-<button>Generar Factura</button>
+<h3>Datos de la Factura</h3>
+<div>
+    <input @bind="nuevaFactura.Nombre_Cliente" placeholder="Nombre del Cliente" />
+</div>
+<div class="mt-2">
+    <label>Fecha:</label>
+    <input type="date" @bind="nuevaFactura.Fecha_emision" />
+</div>
 
+<hr />
+
+<h3>Agregar Artículo</h3>
+<div>
+    <input @bind="articuloTemporal.Nombre" placeholder="Nombre del Artículo" />
+    <input type="number" @bind="articuloTemporal.Precio" placeholder="Precio" />
+    <button @onclick="AgregarArticuloALista">Añadir Artículo</button>
+</div>
+
+<hr />
+
+<div class="panel-articulos">
+    <h3>Artículos en esta Factura</h3>
+    @if (nuevaFactura.Articulos.Any())
+    {
+        <table class="table">
+            <thead> <tr> <th>Artículo</th> <th>Precio</th> </tr> </thead>
+            <tbody>
+                @foreach (var art in nuevaFactura.Articulos)
+                {
+                    <tr> <td>@art.Nombre</td> <td>$@art.Precio</td> </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td><strong>TOTAL:</strong></td>
+                    <td><strong>$@nuevaFactura.Articulos.Sum(a => a.Precio)</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+    }
+    else
+    {
+        <p>Aún no hay artículos en la factura.</p>
+    }
+</div>
+
+<hr />
+
+<button @onclick="GuardarFacturaCompleta" class="btn btn-success">Generar Factura</button>
+
+@code {
+    private Factura nuevaFactura = new() { Fecha_emision = DateOnly.FromDateTime(DateTime.Now) };
+    private Articulo articuloTemporal = new();
+
+    private void AgregarArticuloALista()
+    {
+        if (!string.IsNullOrWhiteSpace(articuloTemporal.Nombre) && articuloTemporal.Precio > 0)
+        {
+            nuevaFactura.Articulos.Add(articuloTemporal);
+            articuloTemporal = new();
+        }
+    }
+
+    private async Task GuardarFacturaCompleta()
+    {
+        if (!string.IsNullOrWhiteSpace(nuevaFactura.Nombre_Cliente) && nuevaFactura.Articulos.Any())
+        {
+            await ControladorFacturas.AgregarFactura(nuevaFactura);
+            nuevaFactura = new() { Fecha_emision = DateOnly.FromDateTime(DateTime.Now) };
+            articuloTemporal = new();
+        }
+    }
+}
