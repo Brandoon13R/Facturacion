@@ -1,0 +1,54 @@
+﻿@page "/FacturasGeneradas"
+@rendermode InteractiveServer
+@using Facturación.Components.Data
+@inject Facturación.Components.Controlador.ServicioControlador ControladorFacturas
+
+<h2>Facturas Generadas</h2>
+
+<div>
+    <p>Lista de facturas generadas:</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre del Cliente</th>
+                <th>Fecha de Emisión</th>
+                <th>Precio Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var factura in facturas)
+            {
+                <tr>
+                    <td>@factura.Nombre_Cliente</td>
+                    <td>@factura.Fecha_emision</td>
+                    <td>$@factura.Precio_Total</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<br />
+
+<div>
+    <input @bind="eliminarfactura.Identificador" placeholder="Elimina factura>" />
+    <button @onclick="EliminarFactura">Eliminar Factura</button>
+</div>
+
+<a href="/"><button>Ir a Generar Facturas</button></a>
+
+@code {
+    private List<Factura> facturas = new();
+    private Factura eliminarfactura = new();
+
+    private async Task EliminarFactura()
+    {
+        await ControladorFacturas.EliminarFactura(eliminarfactura.Identificador);
+        facturas = await ControladorFacturas.ObtenerFacturas();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        facturas = await ControladorFacturas.ObtenerFacturas();
+    }
+}
