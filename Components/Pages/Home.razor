@@ -36,7 +36,11 @@
             <tbody>
                 @foreach (var art in nuevaFactura.Articulos)
                 {
-                    <tr> <td>@art.Nombre</td> <td>$@art.Precio</td> </tr>
+                    <tr> 
+                        <td>@art.Nombre</td> 
+                        <td>$@art.Precio</td>
+                        <td> <button @onclick="() => EliminarArticuloLista(art)">Eliminar articulo</button> </td>
+                    </tr>
                 }
             </tbody>
             <tfoot>
@@ -55,11 +59,15 @@
 
 <hr />
 
-<button @onclick="GuardarFacturaCompleta" class="btn btn-success">Generar Factura</button>
+<button @onclick="GuardarFacturaCompleta" class="btn btn-success">Generar Factura</button><br />
+<br />
+
+<a href="/FacturasGeneradas"><button>Ir a facturas</button></a>
 
 @code {
     private Factura nuevaFactura = new() { Fecha_emision = DateOnly.FromDateTime(DateTime.Now) };
     private Articulo articuloTemporal = new();
+    private List<Factura> facturas = new();
 
     private void AgregarArticuloALista()
     {
@@ -68,6 +76,11 @@
             nuevaFactura.Articulos.Add(articuloTemporal);
             articuloTemporal = new();
         }
+    }
+
+    private void EliminarArticuloLista(Articulo articuloABorrar)
+    {
+        nuevaFactura.Articulos.Remove(articuloABorrar);
     }
 
     private async Task GuardarFacturaCompleta()

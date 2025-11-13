@@ -34,8 +34,8 @@ var comando = conexion.CreateCommand();
 
 comando.CommandText = @"
     CREATE TABLE IF NOT EXISTS facturas(
-        Identificador INTEGER,
-        Fecha_emision TEXT,
+        Identificador INTEGER PRIMARY KEY AUTOINCREMENT,
+        Fecha_emision DATE,
         Nombre_Cliente TEXT,
         Precio_Total INTEGER
     );
