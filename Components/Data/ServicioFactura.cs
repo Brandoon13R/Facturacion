@@ -7,7 +7,29 @@ namespace Facturación.Components.Data
         private List<Factura> facturas = new List<Factura>();
         private string _connectionString = "DataSource=FacturacionBase.db";
 
-        public Task<List<Factura>> ObtenerFacturas() => Task.FromResult(facturas);
+        public async Task<List<Factura>> ObtenerFacturas()
+        {
+            facturas.Clear();
+            String ruta = "FacturacionBase.db";
+            using var conexion = new SqliteConnection($"DataSource={ruta}");
+            await conexion.OpenAsync();
+
+            var comando = conexion.CreateCommand();
+            comando.CommandText = "SELECT Identificador, Fecha_emision, Nombre_Cliente, Precio_Total FROM facturas";
+            using var lector = await comando.ExecuteReaderAsync();
+
+            while (await lector.ReadAsync())
+            {
+                facturas.Add(new Factura
+                {
+                    Identificador = lector.GetInt32(0),
+                    Fecha_emision = DateOnly.FromDateTime(lector.GetDateTime(1)),
+                    Nombre_Cliente = lector.GetString(2),
+                    Precio_Total = lector.GetInt32(3)
+                });
+            }
+            return facturas;
+        }
 
         public async Task AgregarFactura(Factura factura)
         {
@@ -15,32 +37,51 @@ namespace Facturación.Components.Data
             {
                 await conexion.OpenAsync();
 
-                // --- Inserta la Factura (el "encabezado") ---
-                var cmdFactura = conexion.CreateCommand();
-                cmdFactura.CommandText =
+                var Factura = conexion.CreateCommand();
+                Factura.CommandText =
                     "INSERT INTO facturas (Identificador, Fecha_emision, Nombre_Cliente, Precio_Total) " +
-                    "VALUES (@id, @fecha, @cliente, @total)";
+                    "VALUES (@identificador, @fecha, @cliente, @total)";
 
-                cmdFactura.Parameters.AddWithValue("@id", factura.Identificador);
-                cmdFactura.Parameters.AddWithValue("@fecha", factura.Fecha_emision.ToString("yyyy-MM-dd"));
-                cmdFactura.Parameters.AddWithValue("@cliente", factura.Nombre_Cliente);
-                cmdFactura.Parameters.AddWithValue("@total", factura.Precio_Total);
-                await cmdFactura.ExecuteNonQueryAsync();
+                Factura.Parameters.AddWithValue("@identificador", factura.Identificador);
+                Factura.Parameters.AddWithValue("@fecha", factura.Fecha_emision.ToString("yyyy-MM-dd"));
+                Factura.Parameters.AddWithValue("@cliente", factura.Nombre_Cliente);
+                Factura.Parameters.AddWithValue("@total", factura.Precio_Total);
+                await Factura.ExecuteNonQueryAsync();
 
                 foreach (var articulo in factura.Articulos)
                 {
-                    var cmdArticulo = conexion.CreateCommand();
-                    cmdArticulo.CommandText =
+                    var Articulo = conexion.CreateCommand();
+                    Articulo.CommandText =
                         "INSERT INTO articulos (Nombre, Precio, FacturaId) " +
                         "VALUES (@nombre, @precio, @facturaId)";
 
-                    cmdArticulo.Parameters.AddWithValue("@nombre", articulo.Nombre);
-                    cmdArticulo.Parameters.AddWithValue("@precio", articulo.Precio);
-                    cmdArticulo.Parameters.AddWithValue("@facturaId", factura.Identificador); // El vínculo
-                    await cmdArticulo.ExecuteNonQueryAsync();
+                    Articulo.Parameters.AddWithValue("@nombre", articulo.Nombre);
+                    Articulo.Parameters.AddWithValue("@precio", articulo.Precio);
+                    Articulo.Parameters.AddWithValue("@facturaId", factura.Identificador);
+                    await Articulo.ExecuteNonQueryAsync();
                 }
             }
             facturas.Add(factura);
+        }
+
+        public async Task EliminarFactura(int Identificador)
+        {
+            using (var conexion = new SqliteConnection(_connectionString))
+            {
+                await conexion.OpenAsync();
+
+                var comando = conexion.CreateCommand();
+                comando.CommandText = "DELETE FROM facturas WHERE Identificador = @identificador";
+                comando.Parameters.AddWithValue("@identificador", Identificador);
+
+                await comando.ExecuteNonQueryAsync();
+
+                var facturaABorrar = facturas.FirstOrDefault(f => f.Identificador == Identificador);
+                if (facturaABorrar != null)
+                {
+                    facturas.Remove(facturaABorrar);
+                }
+            }
         }
     }
 }
