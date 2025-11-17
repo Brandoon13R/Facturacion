@@ -21,6 +21,18 @@ namespace Facturación.Components.Controlador
             factura.Precio_Total = factura.Articulos.Sum(a => a.Precio);
             await _servicioFactura.AgregarFactura(factura);
         }
+
+        public async Task EliminarFactura(int Identificador)
+        {
+            await _servicioFactura.EliminarFactura(Identificador);
+        }
+        
+        public async Task ActualizarFactura(Factura factura)
+        {
+            factura.Precio_Total = factura.Articulos.Sum(a => a.Precio);
+            await _servicioFactura.ActualizarFactura(factura);
+        }
+
         private async Task<int> GenerarNuevoID()
         {
             var facturas = await _servicioFactura.ObtenerFacturas();
