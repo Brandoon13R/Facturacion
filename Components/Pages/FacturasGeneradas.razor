@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @using Facturación.Components.Data
 @inject Facturación.Components.Controlador.ServicioControlador ControladorFacturas
+@inject NavigationManager NavigationManager
 
 <h2>Facturas Generadas</h2>
 
@@ -23,6 +24,8 @@
                     <td>@factura.Nombre_Cliente</td>
                     <td>@factura.Fecha_emision</td>
                     <td>$@factura.Precio_Total</td>
+                    <td><button @onclick="() => EditarFactura(factura.Identificador)">Editar</button>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -36,6 +39,8 @@
 </div>
 
 <a href="/"><button>Ir a Generar Facturas</button></a>
+<a href="/reportes"><button>Generar Reporte</button></a>
+
 
 @code {
     private List<Factura> facturas = new();
@@ -45,6 +50,16 @@
     {
         await ControladorFacturas.EliminarFactura(eliminarfactura.Identificador);
         facturas = await ControladorFacturas.ObtenerFacturas();
+    }
+
+    private void EditarFactura(int idFactura)
+    {
+        NavigationManager.NavigateTo($"/editarfactura/{idFactura}");
+    }
+
+    private void GenerarReporte()
+    {
+        NavigationManager.NavigateTo($"/generarreporte");
     }
 
     protected override async Task OnInitializedAsync()

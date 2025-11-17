@@ -1,0 +1,88 @@
+﻿@page "/reportes"
+@rendermode InteractiveServer
+@using Facturación.Components.Data
+@using System.Globalization
+@inject Facturación.Components.Controlador.ServicioControlador ControladorFacturas
+
+<h3>Reportes Anuales</h3>
+
+<div class="d-flex gap-2 align-items-center mb-4">
+    <label>Año del reporte:</label>
+    <input type="number" class="form-control w-auto" @bind="añoSeleccionado" />
+    <button class="btn btn-primary" @onclick="GenerarReporte">Generar Reporte</button>
+</div>
+
+@if (reporteAgrupado == null)
+{
+    <p><em>Cargando o selecciona un año...</em></p>
+}
+else if (!reporteAgrupado.Any())
+{
+    <p>No se encontraron facturas para el año @añoSeleccionado.</p>
+}
+else
+{
+    @foreach (var grupoMes in reporteAgrupado)
+    {
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h4 class="m-0 text-capitalize">
+                    @CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(grupoMes.Key)
+                </h4>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Fecha</th>
+                            <th class="text-end">Precio Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var factura in grupoMes)
+                        {
+                            <tr>
+                                <td>@factura.Nombre_Cliente</td>
+                                <td>@factura.Fecha_emision</td>
+                                <td class="text-end">$@factura.Precio_Total.ToString("N2")</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="table-primary fw-bold">
+                            <td colspan="2" class="text-end">Total Mes:</td>
+                            <td class="text-end">$@grupoMes.Sum(f => f.Precio_Total).ToString("N2")</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    }
+    <div class="alert alert-success text-end">
+        <h4>Total Anual @añoSeleccionado: $@reporteAgrupado.Sum(g => g.Sum(f => f.Precio_Total)).ToString("N2")</h4>
+    </div>
+}
+
+@code {
+    private int añoSeleccionado = DateTime.Now.Year;
+    private List<Factura> todasLasFacturas = new();
+    private IEnumerable<IGrouping<int, Factura>>? reporteAgrupado;
+
+    protected override async Task OnInitializedAsync()
+    {
+        todasLasFacturas = await ControladorFacturas.ObtenerFacturas();
+        GenerarReporte();
+    }
+
+    private void GenerarReporte()
+    {
+        if (todasLasFacturas != null)
+        {
+            reporteAgrupado = todasLasFacturas
+                .Where(f => DateTime.Parse(f.Fecha_emision).Year == añoSeleccionado)
+                .GroupBy(f => DateTime.Parse(f.Fecha_emision).Month)
+                .OrderBy(g => g.Key);
+        }
+    }
+}

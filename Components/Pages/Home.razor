@@ -13,7 +13,7 @@
 </div>
 <div class="mt-2">
     <label>Fecha:</label>
-    <input type="date" @bind="nuevaFactura.Fecha_emision" />
+    <input type="text" @bind="nuevaFactura.Fecha_emision" />
 </div>
 
 <hr />
@@ -65,7 +65,7 @@
 <a href="/FacturasGeneradas"><button>Ir a facturas</button></a>
 
 @code {
-    private Factura nuevaFactura = new() { Fecha_emision = DateOnly.FromDateTime(DateTime.Now) };
+    private Factura nuevaFactura = new();
     private Articulo articuloTemporal = new();
     private List<Factura> facturas = new();
 
@@ -73,7 +73,12 @@
     {
         if (!string.IsNullOrWhiteSpace(articuloTemporal.Nombre) && articuloTemporal.Precio > 0)
         {
-            nuevaFactura.Articulos.Add(articuloTemporal);
+            nuevaFactura.Articulos.Add(new Articulo
+            {
+                Nombre = articuloTemporal.Nombre,
+                Precio = articuloTemporal.Precio
+            });
+
             articuloTemporal = new();
         }
     }
@@ -88,7 +93,7 @@
         if (!string.IsNullOrWhiteSpace(nuevaFactura.Nombre_Cliente) && nuevaFactura.Articulos.Any())
         {
             await ControladorFacturas.AgregarFactura(nuevaFactura);
-            nuevaFactura = new() { Fecha_emision = DateOnly.FromDateTime(DateTime.Now) };
+            nuevaFactura = new();
             articuloTemporal = new();
         }
     }
