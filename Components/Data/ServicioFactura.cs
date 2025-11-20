@@ -1,4 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
+using System.Text.RegularExpressions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Facturación.Components.Data
 {
@@ -90,8 +92,12 @@ namespace Facturación.Components.Data
                 var comando = conexion.CreateCommand();
                 comando.CommandText = "DELETE FROM facturas WHERE Identificador = @identificador";
                 comando.Parameters.AddWithValue("@identificador", Identificador);
-
                 await comando.ExecuteNonQueryAsync();
+
+                var comandoFactura = conexion.CreateCommand();
+                comandoFactura.CommandText = "DELETE FROM facturas WHERE Identificador = @id";
+                comandoFactura.Parameters.AddWithValue("@id", Identificador);
+                await comandoFactura.ExecuteNonQueryAsync();
 
                 var facturaABorrar = facturas.FirstOrDefault(f => f.Identificador == Identificador);
                 if (facturaABorrar != null)
@@ -128,6 +134,112 @@ namespace Facturación.Components.Data
                     facturaAActualizar.Articulos = factura.Articulos;
                 }
             }
+        }
+
+        public async Task<List<string>> FacturasCaras()
+        {
+            var clientesCaros = new List<string>();
+            using (var conexion = new SqliteConnection(_connectionString))
+            {
+                await conexion.OpenAsync();
+
+                var comando = conexion.CreateCommand();
+                comando.CommandText = "SELECT Nombre_Cliente FROM facturas WHERE Precio_Total > 10000;";
+            
+                using (var lector = await comando.ExecuteReaderAsync())
+                {
+                    while (await lector.ReadAsync())
+                    {
+                        clientesCaros.Add(lector.GetString(0));
+                    }
+                }
+            }
+            return clientesCaros;
+        }
+
+        public async Task<List<string>> PreciosIntermedios()
+        {
+            var Cliente = new List<string>();
+            using (var conexion = new SqliteConnection(_connectionString))
+            {
+                await conexion.OpenAsync();
+
+                var comando = conexion.CreateCommand();
+                comando.CommandText = "SELECT Nombre_Cliente, Precio_Total FROM facturas WHERE Precio_Total >= 5000 AND Precio_Total <= 7000";
+
+                using (var lector = await comando.ExecuteReaderAsync())
+                {
+                    while (await lector.ReadAsync())
+                    {
+                        Cliente.Add(lector.GetString(0));
+                    }
+                }
+            }
+            return Cliente;
+        }
+
+        public async Task<List<string>> FechasFacturas()
+        {
+            var cliente = new List<string>();
+            using (var conexion = new SqliteConnection(_connectionString))
+            {
+                await conexion.OpenAsync();
+                var comando = conexion.CreateCommand();
+                comando.CommandText = "SELECT Nombre_Cliente FROM facturas WHERE Fecha_emision BETWEEN '2025-10-01' AND '2025-12-31'";
+                using (var lector = await comando.ExecuteReaderAsync())
+                {
+                    while (await lector.ReadAsync())
+                    {
+                        cliente.Add(lector.GetString(0));
+                    }
+                }
+            }
+            return cliente;
+        }
+
+        public async Task<List<string>> MesMayorVentas() 
+        {
+            var cliente = new List<string>();
+            using (var conexion = new SqliteConnection(_connectionString))
+            {
+                await conexion.OpenAsync();
+                var comando = conexion.CreateCommand();
+                comando.CommandText = 
+                    "SELECT strftime('%m', Fecha_emision) AS Mes, SUM(Precio_Total) AS Total_Ventas " +
+                    "FROM facturas " +
+                    "GROUP BY Mes " +
+                    "ORDER BY Total_Ventas DESC " +
+                    "LIMIT 1;";
+
+                using (var lector = await comando.ExecuteReaderAsync())
+                {
+                    while (await lector.ReadAsync())
+                    {
+                        cliente.Add(lector.GetString(0));
+                    }
+                }
+            }
+            return cliente;
+        }
+
+        public async Task<List<string>> ArticuloMasVendido()
+        {
+            var cliente = new List<string>();
+            using (var conexion = new SqliteConnection(_connectionString))
+            {
+                await conexion.OpenAsync();
+                var comando = conexion.CreateCommand();
+                comando.CommandText = "SELECT Nombre, COUNT(Nombre) AS TotalVentas FROM articulos GROUP BY Nombre ORDER BY TotalVentas DESC LIMIT 1;" ;
+
+                using (var lector = await comando.ExecuteReaderAsync())
+                {
+                    while (await lector.ReadAsync())
+                    {
+                        cliente.Add(lector.GetString(0));
+                    }
+                }
+            }
+            return cliente;
         }
     }
 }

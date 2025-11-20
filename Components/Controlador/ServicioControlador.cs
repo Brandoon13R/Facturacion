@@ -33,6 +33,31 @@ namespace Facturación.Components.Controlador
             await _servicioFactura.ActualizarFactura(factura);
         }
 
+        public async Task<List<string>> FacturasCaras()
+        {
+            return await _servicioFactura.FacturasCaras();
+        }
+
+        public async Task<List<string>> PrecioIntermedio()
+        {
+            return await _servicioFactura.PreciosIntermedios();
+        }
+
+        public async Task<List<string>> FechasFacturas()
+        {
+            return await _servicioFactura.FechasFacturas();
+        }
+
+        public async Task<List<string>> MesMayorVentas()
+        {
+            return await _servicioFactura.MesMayorVentas();
+        }
+
+        public async Task<List<string>> ArticuloMasVendido()
+        {
+            return await _servicioFactura.ArticuloMasVendido();
+        }
+
         private async Task<int> GenerarNuevoID()
         {
             var facturas = await _servicioFactura.ObtenerFacturas();
