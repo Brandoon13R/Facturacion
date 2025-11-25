@@ -1,0 +1,39 @@
+﻿@page "/"
+@rendermode InteractiveServer
+
+<PageTitle>Interfaz</PageTitle>
+
+<h1 class="titulo">Sistema de Facturación</h1>
+
+<div class="menu">
+
+    <a href="/GenerarFacturas" class="tile">
+        <button class="text">Generar Factura</button>
+    </a>
+
+    <a href="/FacturasGeneradas" class="tile">
+        <button class="text">Facturas Generadas</button>
+    </a>
+
+    <a href="/consultas" class="tile">
+        <button class="text">Consultas</button>
+    </a>
+
+    <a href="/reportes" class="tile">
+        <button class="text">Reportes</button>
+    </a>
+
+</div>
+
+<h3 class="mini_titulo">Bienvenido al sistema de facturación</h3>
+
+<div class="texto">
+    <p>En este sitio podras generar, consultar las facturas generadas, hacer concultas, ver un reporte y editar las facturas.</p>
+    <p>Generar: Podras añadir articulos a tu factura, junto con el nombre del cliente y la fecha que se realizo.</p>
+    <p>Facturas Generadas: Podras ver las facturas que se han generado a lo largo del tiempo y editarlas.</p>
+
+</div>
+
+@code {
+
+}
