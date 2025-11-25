@@ -2,60 +2,66 @@
 @using Facturación.Components.Data
 @using System.Globalization
 @inject Facturación.Components.Controlador.ServicioControlador ControladorFacturas
+<head>
+    <link href="~/css/Consultas.css" rel="stylesheet" />
+</head>
 
-<h3>Consultas</h3>
+<body>
+    <h3>Consultas</h3>
 
-<p>Precios mayores a $10,000</p>
-<ul>
-    @foreach (var cliente in facturasCaras)
+    <p>Precios mayores a $10,000</p>
+    <ul>
+        @foreach (var cliente in facturasCaras)
         {
             <li>
-                    <td>@cliente</td>
+                <td>@cliente</td>
             </li>
         }
-</ul>
+    </ul>
 
-<p>Precios entre $5,000 y $7,000</p>
-<ul>
-    @foreach (var cliente in preciosIntermedios)
-    {
-        <li>
-            @cliente
-        </li>
-    }
-</ul>
+    <p>Precios entre $5,000 y $7,000</p>
+    <ul>
+        @foreach (var cliente in preciosIntermedios)
+        {
+            <li>
+                @cliente
+            </li>
+        }
+    </ul>
 
-<p>Fechas de facturas emitidas en 2025-10-01 al 2025-12-31</p>
-<ul>
-    @foreach (var Clientes in fechasFacturas)
-    {
-        <li>
-            @Clientes
-        </li>
-    }
-</ul>
+    <p>Fechas de facturas emitidas en 2025-10-01 al 2025-12-31</p>
+    <ul>
+        @foreach (var Clientes in fechasFacturas)
+        {
+            <li>
+                @Clientes
+            </li>
+        }
+    </ul>
 
-<p>Mes con mas ventas</p>
-<ul>
-    @foreach (var Clientes in mesMayorVentas)
-    {
-        <li>
-            @Clientes
-        </li>
-    }
-</ul>
+    <p>Mes con mas ventas</p>
+    <ul>
+        @foreach (var Clientes in mesMayorVentas)
+        {
+            <li>
+                @Clientes
+            </li>
+        }
+    </ul>
 
-<p>Articulo Mas Vendido</p>
-<ul>
-    @foreach (var clientes in articuloMasVendido)
-    {
-        <li>
-            @clientes
-        </li>
-    }
-</ul>
+    <p>Articulo Mas Vendido</p>
+    <ul>
+        @foreach (var clientes in articuloMasVendido)
+        {
+            <li>
+                @clientes
+            </li>
+        }
+    </ul>
 
-<a href="/"><button>Ir a Generar Facturas</button></a>
+    <a href="/"><button>Ir a interfaz</button></a>
+</body>
+
 
 @code {
     private List<string> facturasCaras = new();
