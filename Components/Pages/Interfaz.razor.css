@@ -1,0 +1,61 @@
+﻿h1.titulo{
+    text-align: center;
+    background-color: black;
+    color: white;
+    position: relative;
+    margin-right: -8px;
+    margin-left: -8px;
+    margin-top: -15px;
+    padding: 40px;
+    box-shadow: 10px 10px 15px;
+}
+
+h3.mini_titulo {
+    text-align: center;
+    background-color: black;
+    color: white;
+    font-size: 20px;
+    position: relative;
+    margin-right: 35%;
+    margin-left: 35%;
+    padding: 10px;
+    border-radius: 15px;
+}
+
+div.menu {
+    text-align: center;
+    background-color: black;
+    color: white;
+    position: relative;
+    margin-top: -50px;
+    margin-right: -8px;
+    margin-left: -8px;
+    padding: 15px;
+    gap: 50px;
+}
+
+button.text{
+    background-color: black;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-style: italic; 
+}
+
+button:hover {
+    background-color: gray;
+    transform: scale(1.05);
+}
+
+div.texto {
+    background-color: black;
+    color: white;
+    font-style: initial;
+    font-size: 15px;
+    text-align: justify;
+    border-radius: 20px;
+    margin-right: 35%;
+    margin-left: 35%;
+    padding: 20px;
+    margin-top: 100px;
+}
