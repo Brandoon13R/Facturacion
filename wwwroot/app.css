@@ -151,3 +151,7 @@ button:hover.text {
     background-color: gray;
     transform: scale(1.05);
 }
+
+ul.Justificado{
+    text-align: justify;
+}
