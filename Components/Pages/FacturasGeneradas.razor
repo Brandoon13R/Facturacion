@@ -4,9 +4,15 @@
 @inject Facturación.Components.Controlador.ServicioControlador ControladorFacturas
 @inject NavigationManager NavigationManager
 
-<h2>Facturas Generadas</h2>
+<h1 class="titulo">Facturas Generadas</h1>
 
-<div>
+<div class="menu">
+    <a href="/">
+        <button class="text">Interfaz</button>
+    </a>
+</div>
+
+<div class="texto-siu">
     <p>Lista de facturas generadas:</p>
     <table>
         <thead>
@@ -32,14 +38,10 @@
 </div>
 <br />
 
-<div>
+<div class="texto-siu">
     <input @bind="eliminarfactura.Identificador" placeholder="Elimina factura>" />
     <button @onclick="EliminarFactura">Eliminar Factura</button>
 </div>
-
-<a href="/"><button>Ir a Generar Facturas</button></a>
-<a href="/reportes"><button>Generar Reporte</button></a>
-
 
 @code {
     private List<Factura> facturas = new();
