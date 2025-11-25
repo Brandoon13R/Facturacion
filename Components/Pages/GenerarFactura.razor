@@ -1,0 +1,102 @@
+﻿@page "/GenerarFacturas"
+@rendermode InteractiveServer
+@using Facturación.Components.Data
+@inject Facturación.Components.Controlador.ServicioControlador ControladorFacturas
+
+<PageTitle>Facturación</PageTitle>
+
+<h1 class="titulo">Generación de facturas</h1>
+
+<div class="menu">
+    <a href="/" class="tile">
+        <button class="text">Interfaz</button>
+    </a>
+</div>
+
+<!-- Esata parte sirve para que el usuario introduzca el nombre del cliente y la fecha en que se genera la factura -->
+<h3 class="mini_titulo">Datos de la Factura</h3>
+    <div class="texto-siu">
+        <input class="placeholder" @bind="nuevaFactura.Nombre_Cliente" placeholder="Nombre del Cliente" /><br />
+        <input class="placeholder" type="text" @bind="nuevaFactura.Fecha_emision" placeholder="Fecha de la factura"/>
+    </div>
+
+<hr />
+
+<!-- Esata parte sirve para que el usuario agregue los articulos a la factura -->
+<h3 class="mini_titulo">Agregar Artículo</h3>
+<div class="texto-siu">
+    <input class="placeholder" @bind="articuloTemporal.Nombre" placeholder="Nombre del Artículo" />
+    <input class="placeholder" type="number" @bind="articuloTemporal.Precio" placeholder="Precio" />
+    <button class="tocar" @onclick="AgregarArticuloALista">Añadir Artículo</button>
+    <button @onclick="GuardarFacturaCompleta" class="aceptar">Generar Factura</button>
+</div>
+
+<hr />
+
+<!-- Codigo que agrega los articulos a la lista -->
+<div class="articulos">
+    <h3>Artículos en esta Factura</h3>
+    @if (nuevaFactura.Articulos.Any())
+    {
+        <table class="table">
+            <thead> <tr> <th>Artículo</th> <th>Precio</th> </tr> </thead>
+            <tbody>
+                @foreach (var art in nuevaFactura.Articulos)
+                {
+                    <tr>
+                        <td>@art.Nombre</td>
+                        <td>$@art.Precio</td>
+                        <td> <button class="tocar" @onclick="() => EliminarArticuloLista(art)">Eliminar articulo</button> </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td><strong>TOTAL:</strong></td>
+                    <td><strong>$@nuevaFactura.Articulos.Sum(a => a.Precio)</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+    }
+    else
+    {
+        <p>Aún no hay artículos en la factura.</p>
+    }
+</div>
+
+<hr />
+
+@code {
+    private Factura nuevaFactura = new();
+    private Articulo articuloTemporal = new();
+    private List<Factura> facturas = new();
+
+    private void AgregarArticuloALista()
+    {
+        if (!string.IsNullOrWhiteSpace(articuloTemporal.Nombre) && articuloTemporal.Precio > 0)
+        {
+            nuevaFactura.Articulos.Add(new Articulo
+            {
+                Nombre = articuloTemporal.Nombre,
+                Precio = articuloTemporal.Precio
+            });
+
+            articuloTemporal = new();
+        }
+    }
+
+    private void EliminarArticuloLista(Articulo articuloABorrar)
+    {
+        nuevaFactura.Articulos.Remove(articuloABorrar);
+    }
+
+    private async Task GuardarFacturaCompleta()
+    {
+        if (!string.IsNullOrWhiteSpace(nuevaFactura.Nombre_Cliente) && nuevaFactura.Articulos.Any())
+        {
+            await ControladorFacturas.AgregarFactura(nuevaFactura);
+            nuevaFactura = new();
+            articuloTemporal = new();
+        }
+    }
+}
